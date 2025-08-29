@@ -5,5 +5,7 @@
     <typeAliases>
         <typeAlias alias="blogResponseDTO" 
                     type="com.lgcns.inspire_restspring.rest.blog.domain.BlogResponseDTO" />
+        <typeAlias alias="blogRequestDTO" 
+                    type="com.lgcns.inspire_restspring.rest.blog.domain.BlogRequestDTO" />
     </typeAliases>
 </configuration>

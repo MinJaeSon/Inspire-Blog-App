@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -86,24 +87,36 @@ public class BlogCtrl {
     @PostMapping("/register")
     public ResponseEntity<Void> register(
         @RequestBody(description = "생성할 블로그 정보를 전달 받음")
-        @org.springframework.web.bind.annotation.RequestBody BlogRequestDTO request) { // parameter를 DTO 객체로 받는 방법 -> json으로 들어오는걸 스프링이 자동으로 매핑해줌(오토바인딩)
+        @org.springframework.web.bind.annotation.RequestBody BlogRequestDTO request) { // parameter를 DTO 객체로 받는 방법 -> json으로 들어오는걸 스프링이 자동으로 매핑해줌(오토바인딩). 일반적으로 이 방법을 많이 씀
 
         System.out.println("[debug] >>> blog ctrl path POST : /register ");
         System.out.println("[debug] >>> param dto   = " + request);
-        
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+
+        int flag = service.insert(request);
+        if (flag == 1) {
+            // return ResponseEntity.status(HttpStatus.CREATED).body(null); // body 없이 이렇게 반환도 가능
+            return new ResponseEntity<>(HttpStatus.CREATED); // 201 : 생성 성공
+        } else {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/read/{id}")
     public ResponseEntity<BlogResponseDTO> read(@PathVariable("id") Integer id) {
         System.out.println("[debug] >>> blog ctrl path GET : /read/ ");
         System.out.println("[debug] param is = " + id);
-        BlogResponseDTO response = BlogResponseDTO.builder()
-                                                .id(id)
-                                                .title("블로그 제목 ")
-                                                .content("블로그 내용 ")
-                                                .build();
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        // BlogResponseDTO response = BlogResponseDTO.builder()
+        //                                         .id(id)
+        //                                         .title("블로그 제목 ")
+        //                                         .content("블로그 내용 ")
+        //                                         .build();
+
+        BlogResponseDTO response = service.findById(id);
+        if (response != null) {
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
     
     // path value와 request body를 동시에 받는 방법
@@ -116,7 +129,12 @@ public class BlogCtrl {
         System.out.println("[debug] >>> param is    = " + id);
         System.out.println("[debug] >>> param dto   = " + request);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        int flag = service.update(id, request);
+        if (flag == 1) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @DeleteMapping("/delete/{id}")
@@ -124,6 +142,24 @@ public class BlogCtrl {
         System.out.println("[debug] >>> blog ctrl path DELETE : /delete/ ");
         System.out.println("[debug] param is = " + id);
 
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        int flag = service.delete(id);
+        if (flag == 1) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<BlogResponseDTO>> search(@RequestParam("keyword") String keyword) { // path variable 방식도 가능은 한데, 검색어니까 파라미터로 합시더
+        System.out.println("[debug] >>> blog ctrl path GET : /search ");
+        System.out.println("[debug] param is = " + keyword);
+
+        List<BlogResponseDTO> list = service.findByKeyword(keyword);
+        if (list != null && list.size() > 0) {
+            return new ResponseEntity<>(list, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 }
