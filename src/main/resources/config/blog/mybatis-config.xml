@@ -3,9 +3,16 @@
 
 <configuration>
     <typeAliases>
+        <!-- blog -->
         <typeAlias alias="blogResponseDTO" 
                     type="com.lgcns.inspire_restspring.rest.blog.domain.BlogResponseDTO" />
         <typeAlias alias="blogRequestDTO" 
                     type="com.lgcns.inspire_restspring.rest.blog.domain.BlogRequestDTO" />
+
+        <!-- comment -->
+        <typeAlias alias="commentResponseDTO" 
+                    type="com.lgcns.inspire_restspring.rest.comment.domain.CommentResponseDTO" />
+        <typeAlias alias="commentRequestDTO" 
+                    type="com.lgcns.inspire_restspring.rest.comment.domain.CommentRequestDTO" />
     </typeAliases>
 </configuration>
